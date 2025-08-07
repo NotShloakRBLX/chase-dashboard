@@ -180,6 +180,15 @@
 
     /* Mobile tweaks */
     @media (max-width: 480px) {
+      /* allow scrolling instead of fixed-height */
+      html, body { height: auto; overflow: auto !important; }
+      #login-screen, #dashboard { height: auto; }
+      /* shrink login box */
+      #login-box { padding: 20px; }
+      #login-box h2 { font-size: 1.5rem; }
+      .input-group input { font-size: 0.9rem; }
+      #login-btn { font-size: 1rem; padding: 10px; }
+
       .your-account-header { padding: 40px 10px; }
       .your-account-header h1 { font-size: 2rem; }
       .account-section { margin: 20px auto; padding: 0 10px; }
@@ -299,7 +308,6 @@
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
       if (u === 'shloak' && p === 'Sac') {
-        // fade out login, fade in dashboard
         loginScreen.classList.remove('visible');
         loginScreen.classList.add('hidden');
         setTimeout(() => {
@@ -312,7 +320,6 @@
       }
     });
 
-    // Allow "Enter" key to submit
     document.querySelectorAll('#username, #password').forEach(el => {
       el.addEventListener('keydown', e => {
         if (e.key === 'Enter') btn.click();
@@ -321,4 +328,3 @@
   </script>
 </body>
 </html>
-
