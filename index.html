@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Your Chase Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    /* ===== Universal & Reset ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body, ul { margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", Roboto, sans-serif; color: #333; height: 100vh; overflow: hidden; }
+
+    /* ===== Fade utility ===== */
+    .fade { transition: opacity 0.4s ease; }
+    .hidden { opacity: 0; pointer-events: none; }
+    .visible { opacity: 1; pointer-events: auto; }
+
+    /* ===== LOGIN SCREEN ===== */
+    #login-screen {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
+      color: #fff;
+    }
+    #login-box {
+      background: rgba(255,255,255,0.1);
+      padding: 40px; border-radius: 12px;
+      width: 90%; max-width: 360px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #login-box h2 {
+      margin-bottom: 24px; font-weight: 300; font-size: 1.8rem;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-group svg {
+      position: absolute; top: 50%; left: 12px;
+      transform: translateY(-50%); width: 20px; height: 20px;
+      fill: rgba(255,255,255,0.8);
+    }
+    .input-group input {
+      width: 100%; padding: 12px 12px 12px 44px;
+      border: none; border-radius: 6px;
+      background: rgba(255,255,255,0.2);
+      color: #fff; font-size: 1rem;
+    }
+    .input-group input::placeholder { color: rgba(255,255,255,0.7); }
+    #login-error {
+      color: #ff5e5e; margin-bottom: 12px; height: 1.2em;
+      font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
+    }
+    #login-btn {
+      width: 100%; padding: 12px;
+      background: #1e8e3e; border: none; border-radius: 6px;
+      color: #fff; font-size: 1.1rem; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    #login-btn:hover { background: #176f2e; }
+
+    /* ===== DASHBOARD (original code, now hidden by default) ===== */
+    #dashboard {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow-y: auto; background: #fff;
+      opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    }
+    #dashboard.visible { opacity: 1; pointer-events: auto; }
+
+    /* === your existing styles below === */
+
+    /* Hero header */
+    .your-account-header {
+      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
+      padding: 60px 20px;
+      text-align: center;
+      color: #fff;
+    }
+    .your-account-header h1 {
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* Sections */
+    .account-section {
+      width: 100%;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .account-section h2 {
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
+      margin-bottom: 12px;
+      color: #2C3E50;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 6px;
+    }
+
+    .account-list {
+      list-style: none;
+      margin-bottom: 30px;
+      padding: 0;
+    }
+    .account-list li {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .account-list li:last-child { border-bottom: none; }
+    .account-list .title,
+    .account-list .amount {
+      flex: 1 1 100%;
+      margin-bottom: 8px;
+    }
+    @media (min-width: 600px) {
+      .account-list li { padding: 16px 0; }
+      .account-list .title,
+      .account-list .amount {
+        flex: 1 1 calc(50% - 1rem);
+        margin-bottom: 0;
+      }
+    }
+
+    /* Boxed account names */
+    .account-list .title {
+      color: #1a73e8;
+      font-weight: 500;
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      transition: background 0.2s, border-color 0.2s;
+      text-decoration: none;
+    }
+    .account-list .title:hover {
+      background: #f9f9f9; border-color: #ccc;
+    }
+
+    /* Balances styling */
+    .account-list .amount {
+      color: #1a73e8;
+      font-weight: 500;
+      text-decoration: none;
+      text-align: right;
+    }
+
+    /* Quick-links buttons */
+    .quick-links {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+    }
+    .quick-links a {
+      display: block;
+      margin: 12px 0;
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+      border-radius: 6px;
+      color: #fff;
+      transition: background 0.25s;
+      text-decoration: none;
+    }
+    .btn-ultimate       { background: #0d3b61; }
+    .btn-ultimate:hover { background: #0b3252; }
+    .btn-creditjourney       { background: #1e8e3e; }
+    .btn-creditjourney:hover { background: #176f2e; }
+    .btn-taxes          { background: #f2a01e; color: #333; }
+    .btn-taxes:hover    { background: #c88719; color: #111; }
+
+    /* Mobile tweaks */
+    @media (max-width: 480px) {
+      .your-account-header { padding: 40px 10px; }
+      .your-account-header h1 { font-size: 2rem; }
+      .account-section { margin: 20px auto; padding: 0 10px; }
+      .account-section h2 { font-size: 1.25rem; }
+      .account-list .title,
+      .account-list .amount { flex: 1 1 100%; margin-bottom: 6px; }
+      .quick-links { padding: 0 10px; }
+      .quick-links a { font-size: 1rem; padding: 10px 16px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" class="fade visible">
+    <div id="login-box">
+      <h2>Login</h2>
+
+      <div id="login-error">Invalid credentials</div>
+
+      <div class="input-group">
+        <!-- user icon -->
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
+        <input type="text" id="username" placeholder="Username">
+      </div>
+
+      <div class="input-group">
+        <!-- lock icon -->
+        <svg viewBox="0 0 24 24"><path d="M17 8V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H5v14h14V8h-2zm-8 0V6c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9z"/></svg>
+        <input type="password" id="password" placeholder="Password">
+      </div>
+
+      <button id="login-btn">Log In</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (hidden until login succeeds) -->
+  <div id="dashboard" class="fade">
+    <div class="your-account-header">
+      <h1>Your Account</h1>
+    </div>
+
+    <div class="account-section">
+      <h2>Bank Accounts (2)</h2>
+      <ul class="account-list">
+        <li>
+          <a class="title" href="https://sites.google.com/view/sapphirechecking2431/home" target="_blank">
+            Chase Sapphire Checking ****2431
+          </a>
+          <a class="amount" href="https://sites.google.com/view/sapphirechecking2431/home" target="_blank">
+            $350.00
+          </a>
+        </li>
+        <li>
+          <a class="title" href="https://sites.google.com/view/savings9124" target="_blank">
+            Chase Savings ****9124
+          </a>
+          <a class="amount" href="https://sites.google.com/view/savings9124" target="_blank">
+            $741.36
+          </a>
+        </li>
+      </ul>
+
+      <h2>Credit Cards (2)</h2>
+      <ul class="account-list">
+        <li>
+          <a class="title" href="https://sites.google.com/view/credit7295/home" target="_blank">
+            Chase Sapphire Reserve ****7295
+          </a>
+          <a class="amount" href="https://sites.google.com/view/credit7295/home" target="_blank">
+            $12.46
+          </a>
+        </li>
+        <li>
+          <a class="title" href="https://sites.google.com/view/credit8126/home" target="_blank">
+            American Airlines AAdvantage Platinum Select ****8126
+          </a>
+          <a class="amount" href="https://sites.google.com/view/credit8126/home" target="_blank">
+            $0.00
+          </a>
+        </li>
+      </ul>
+
+      <h2>Lines of Credit (2)</h2>
+      <ul class="account-list">
+        <li>
+          <span class="title">CREDIT CARDS</span>
+          <span class="amount">$637.54</span>
+        </li>
+        <li>
+          <span class="title">SS Credit Acceptance</span>
+          <span class="amount">$650.00</span>
+        </li>
+      </ul>
+
+      <div class="quick-links">
+        <a class="btn-ultimate" href="https://sites.google.com/view/yourchaseacc/ultimate-rewards" target="_blank">
+          Ultimate Rewards
+        </a>
+        <a class="btn-creditjourney" href="https://sites.google.com/view/yourchaseacc/credit-journey" target="_blank">
+          Credit Journey
+        </a>
+        <a class="btn-taxes" href="https://sites.google.com/view/chasetaxes" target="_blank">
+          Chase Taxes
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loginScreen = document.getElementById('login-screen');
+    const dashboard    = document.getElementById('dashboard');
+    const errMsg       = document.getElementById('login-error');
+    const btn          = document.getElementById('login-btn');
+
+    btn.addEventListener('click', () => {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      if (u === 'shloak' && p === 'Sac') {
+        // fade out login, fade in dashboard
+        loginScreen.classList.remove('visible');
+        loginScreen.classList.add('hidden');
+        setTimeout(() => {
+          dashboard.classList.remove('hidden');
+          dashboard.classList.add('visible');
+        }, 400);
+      } else {
+        errMsg.style.opacity = '1';
+        setTimeout(() => errMsg.style.opacity = '0', 2000);
+      }
+    });
+
+    // Allow "Enter" key to submit
+    document.querySelectorAll('#username, #password').forEach(el => {
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter') btn.click();
+      });
+    });
+  </script>
+</body>
+</html>
