@@ -1,331 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Your Chase Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <meta charset="utf-8" />
+  <title>Chase — Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* ===== Universal & Reset ===== */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body, ul { margin: 0; padding: 0; }
-    body { font-family: "Segoe UI", Roboto, sans-serif; color: #333; height: 100vh; overflow: hidden; }
+    :root{
+      --bg:#0b0e17;
+      --text:#e8edf7;
+      --muted:#9fb0c7;
 
-    /* ===== Fade utility ===== */
-    .fade { transition: opacity 0.4s ease; }
-    .hidden { opacity: 0; pointer-events: none; }
-    .visible { opacity: 1; pointer-events: auto; }
+      --cyan:#22d3ee;
+      --violet:#8b5cf6;
+      --blue:#2ea0ff;
+      --green:#22c55e;
+      --amber:#f6c342;
+      --rose:#ef4444;
 
-    /* ===== LOGIN SCREEN ===== */
-    #login-screen {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
-      color: #fff;
-    }
-    #login-box {
-      background: rgba(255,255,255,0.1);
-      padding: 40px; border-radius: 12px;
-      width: 90%; max-width: 360px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-    #login-box h2 {
-      margin-bottom: 24px; font-weight: 300; font-size: 1.8rem;
-    }
-    .input-group {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    .input-group svg {
-      position: absolute; top: 50%; left: 12px;
-      transform: translateY(-50%); width: 20px; height: 20px;
-      fill: rgba(255,255,255,0.8);
-    }
-    .input-group input {
-      width: 100%; padding: 12px 12px 12px 44px;
-      border: none; border-radius: 6px;
-      background: rgba(255,255,255,0.2);
-      color: #fff; font-size: 1rem;
-    }
-    .input-group input::placeholder { color: rgba(255,255,255,0.7); }
-    #login-error {
-      color: #ff5e5e; margin-bottom: 12px; height: 1.2em;
-      font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
-    }
-    #login-btn {
-      width: 100%; padding: 12px;
-      background: #1e8e3e; border: none; border-radius: 6px;
-      color: #fff; font-size: 1.1rem; font-weight: 500;
-      cursor: pointer; transition: background 0.2s;
-    }
-    #login-btn:hover { background: #176f2e; }
-
-    /* ===== DASHBOARD (original code, now hidden by default) ===== */
-    #dashboard {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      overflow-y: auto; background: #fff;
-      opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-    }
-    #dashboard.visible { opacity: 1; pointer-events: auto; }
-
-    /* === your existing styles below === */
-
-    /* Hero header */
-    .your-account-header {
-      background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 100%);
-      padding: 60px 20px;
-      text-align: center;
-      color: #fff;
-    }
-    .your-account-header h1 {
-      font-size: clamp(1.5rem, 5vw, 3rem);
-      margin: 0;
-      font-weight: 300;
+      --glass: linear-gradient( to bottom right, rgba(16,21,40,.72), rgba(12,16,34,.72) ) padding-box,
+               linear-gradient(120deg, rgba(34,211,238,.55), rgba(139,92,246,.55)) border-box;
+      --glow: 0 24px 80px rgba(34,211,238,.22);
     }
 
-    /* Sections */
-    .account-section {
-      width: 100%;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    .account-section h2 {
-      font-size: clamp(1.25rem, 4vw, 1.5rem);
-      margin-bottom: 12px;
-      color: #2C3E50;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 6px;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; font-family:"Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+      color:var(--text); background:var(--bg); overflow:auto;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    .account-list {
-      list-style: none;
-      margin-bottom: 30px;
-      padding: 0;
+    /* ===== Backgrounds (aurora + soft grid) ===== */
+    .aurora{
+      position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;
+      background: radial-gradient(1200px 700px at 10% -20%, rgba(34,211,238,.16), transparent 60%),
+                  radial-gradient(1200px 800px at 90% 120%, rgba(139,92,246,.16), transparent 60%),
+                  radial-gradient(900px 600px at 50% 10%, rgba(34,197,94,.12), transparent 60%),
+                  linear-gradient(180deg, #0a0d16 0%, #0b0e17 60%, #0a0d16 100%);
     }
-    .account-list li {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
+    .aurora::before,.aurora::after{
+      content:""; position:absolute; inset:-30%;
+      background: conic-gradient(from 0turn, rgba(34,211,238,.10), rgba(139,92,246,.10), rgba(34,197,94,.10), rgba(34,211,238,.10));
+      filter: blur(70px); animation: swirl 28s linear infinite;
     }
-    .account-list li:last-child { border-bottom: none; }
-    .account-list .title,
-    .account-list .amount {
-      flex: 1 1 100%;
-      margin-bottom: 8px;
-    }
-    @media (min-width: 600px) {
-      .account-list li { padding: 16px 0; }
-      .account-list .title,
-      .account-list .amount {
-        flex: 1 1 calc(50% - 1rem);
-        margin-bottom: 0;
-      }
+    .aurora::after{ animation-duration: 40s; animation-direction: reverse; opacity:.7; }
+    @keyframes swirl{ to{ transform: rotate(1turn); } }
+
+    .grid{
+      position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        linear-gradient(transparent 79px, rgba(120,150,210,.06) 80px),
+        linear-gradient(90deg, transparent 79px, rgba(120,150,210,.06) 80px);
+      background-size:80px 80px;
+      mask: radial-gradient(60% 60% at 50% 50%, #000 70%, transparent 100%);
     }
 
-    /* Boxed account names */
-    .account-list .title {
-      color: #1a73e8;
-      font-weight: 500;
-      display: inline-block;
-      padding: 6px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      transition: background 0.2s, border-color 0.2s;
-      text-decoration: none;
+    /* ===== Utilities ===== */
+    .fade{ transition:opacity .4s ease; }
+    .hidden{ opacity:0; pointer-events:none; }
+    .visible{ opacity:1; pointer-events:auto; }
+    .muted{ color:var(--muted); }
+
+    /* ================= LOGIN ================= */
+    #login-screen{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px;
     }
-    .account-list .title:hover {
-      background: #f9f9f9; border-color: #ccc;
+    .login-shell{
+      width:min(460px, 94vw); border-radius:22px; padding:3px;
+      background: linear-gradient(120deg, var(--cyan), var(--violet), var(--cyan));
+      box-shadow: 0 26px 80px rgba(0,0,0,.65), 0 0 120px rgba(34,211,238,.35);
+    }
+    #login-box{
+      border-radius:20px; padding:34px 28px 26px; text-align:center; background:#0c111f;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+    .brandmark{
+      font-weight:900; letter-spacing:.4px; margin-bottom:8px;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+    }
+    .tagline{ color:#cfe6ff; opacity:.9; margin-bottom:18px; }
+
+    #login-error{ height:1.2em; margin-bottom:12px; color:#ff6b6b; opacity:0; transition:opacity .3s; }
+    .input-group{ position:relative; margin:14px 0; }
+    .input{
+      width:100%; padding:14px 14px 14px 50px; border-radius:14px;
+      background:#0e152b; border:1px solid #213154; color:#e5e7eb; font-size:1rem;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input::placeholder{ color:#9ab1d7; }
+    .input:focus{ outline:none; border-color:var(--cyan); box-shadow:0 0 0 4px rgba(34,211,238,.18); background:#0c1430; }
+    .input-icon{ position:absolute; top:50%; left:14px; transform:translateY(-50%); width:22px; height:22px; filter: drop-shadow(0 2px 4px rgba(34,211,238,.55)); }
+
+    .login-actions{ display:flex; gap:10px; margin-top:6px; }
+    .btn{
+      flex:1; display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:13px 16px; border-radius:14px; cursor:pointer; border:1px solid #24325f;
+      background:#0e1426; color:#fff; font-weight:800;
+      transition: box-shadow .2s, border-color .2s, transform .05s, filter .2s;
+    }
+    .btn:hover{ border-color:var(--cyan); box-shadow:0 0 0 4px rgba(34,211,238,.18); }
+    .btn-alt{ background:#141a33; border-color:#2a3868; }
+    .btn:active{ transform:translateY(1px); }
+
+    /* ================= DASHBOARD ================= */
+    .page{ position:absolute; inset:0; overflow:auto; }
+    .topbar{
+      position:sticky; top:0; z-index:5;
+      padding: calc(10px + env(safe-area-inset-top)) 16px 12px;
+      backdrop-filter: blur(10px);
+      background: linear-gradient( to right, rgba(8,12,24,.72), rgba(10,14,26,.58) );
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    }
+    .top-brand{
+      font-weight:900; letter-spacing:.35px;
+      background: linear-gradient(90deg, var(--cyan), var(--violet));
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+    }
+    .chip{
+      display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background: linear-gradient(120deg, #0f152b, #0b1022); border:1px solid rgba(255,255,255,.08);
+      color:#e7efff; font-size:.95rem;
     }
 
-    /* Balances styling */
-    .account-list .amount {
-      color: #1a73e8;
-      font-weight: 500;
-      text-decoration: none;
-      text-align: right;
+    .container{ max-width:1150px; margin:22px auto 100px; padding:0 18px; }
+    .section-title{
+      margin:14px 4px 10px; font-weight:900; letter-spacing:.2px;
+      color:#eaf2ff; font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+      opacity:.95;
     }
 
-    /* Quick-links buttons */
-    .quick-links {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
+    .cards{ display:grid; grid-template-columns: repeat(12, 1fr); gap:14px; }
+    .card{
+      grid-column: span 6;
+      border-radius:18px; padding:16px; background:var(--glass); border:2px solid transparent;
+      box-shadow: var(--glow), inset 0 0 0 1px rgba(255,255,255,.03);
+      backdrop-filter: blur(10px); transition: transform .06s, filter .25s;
     }
-    .quick-links a {
-      display: block;
-      margin: 12px 0;
-      padding: 14px 20px;
-      text-align: center;
-      font-size: 1.1rem;
-      font-weight: 500;
-      border-radius: 6px;
-      color: #fff;
-      transition: background 0.25s;
-      text-decoration: none;
+    .card:hover{ transform: translateY(-1px); filter: saturate(1.05); }
+    .card-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .name{ display:flex; align-items:center; gap:10px; font-weight:800; }
+    .badge{ padding:4px 8px; border-radius:999px; font-size:.8rem; border:1px solid rgba(255,255,255,.1); background:#0e1428; color:#cfe6ff; }
+    .amount{ font-weight:900; color:#bfe1ff; font-size:1.1rem; }
+
+    .card a.full{
+      display:block; margin-top:10px; padding:10px 12px; border-radius:12px; text-decoration:none; color:#cfe6ff;
+      border:1px solid rgba(255,255,255,.08); background:linear-gradient(#0e1426, #0b1224);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
-    .btn-ultimate       { background: #0d3b61; }
-    .btn-ultimate:hover { background: #0b3252; }
-    .btn-creditjourney       { background: #1e8e3e; }
-    .btn-creditjourney:hover { background: #176f2e; }
-    .btn-taxes          { background: #f2a01e; color: #333; }
-    .btn-taxes:hover    { background: #c88719; color: #111; }
+    .card a.full:hover{ border-color:#2a4a8a; color:#fff; }
 
-    /* Mobile tweaks */
-    @media (max-width: 480px) {
-      /* allow scrolling instead of fixed-height */
-      html, body { height: auto; overflow: auto !important; }
-      #login-screen, #dashboard { height: auto; }
-      /* shrink login box */
-      #login-box { padding: 20px; }
-      #login-box h2 { font-size: 1.5rem; }
-      .input-group input { font-size: 0.9rem; }
-      #login-btn { font-size: 1rem; padding: 10px; }
+    /* Quick links */
+    .quick{ grid-column: span 4; }
+    .cta{
+      display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none;
+      padding:14px; border-radius:16px; color:#132; font-weight:900; border:none;
+      background:linear-gradient(#f6c342, #f0b21e); box-shadow:0 12px 30px rgba(246,195,66,.25);
+    }
+    .cta.blue{ background:linear-gradient(#48b0ff, #2ea0ff); color:#04121f; box-shadow:0 12px 30px rgba(46,160,255,.25); }
+    .cta.green{ background:linear-gradient(#34e17f, #22c55e); color:#05150c; box-shadow:0 12px 30px rgba(34,197,94,.25); }
 
-      .your-account-header { padding: 40px 10px; }
-      .your-account-header h1 { font-size: 2rem; }
-      .account-section { margin: 20px auto; padding: 0 10px; }
-      .account-section h2 { font-size: 1.25rem; }
-      .account-list .title,
-      .account-list .amount { flex: 1 1 100%; margin-bottom: 6px; }
-      .quick-links { padding: 0 10px; }
-      .quick-links a { font-size: 1rem; padding: 10px 16px; }
+    /* Totals strip */
+    .totals{
+      grid-column: span 12; display:grid; grid-template-columns: repeat(12, 1fr); gap:14px; margin-bottom:6px;
+    }
+    .total-card{
+      grid-column: span 4; border-radius:16px; padding:14px 16px; background:var(--glass); border:2px solid transparent;
+      box-shadow: var(--glow), inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .total-title{ font-weight:800; color:#dfe9ff; margin-bottom:6px; }
+    .total-value{ font-weight:900; font-size:1.35rem; }
+    .pos{ color:#86efac; } .neg{ color:#fca5a5; }
+
+    /* Responsive */
+    @media (max-width: 920px){
+      .card{ grid-column: span 12; }
+      .quick{ grid-column: span 12; }
+      .total-card{ grid-column: span 6; }
+    }
+    @media (max-width: 560px){
+      .container{ padding:0 12px; }
+      .totals{ gap:10px; }
+      .total-card{ grid-column: span 12; }
+      .amount{ font-size:1rem; }
+      .card a.full{ padding:10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .fade, .card, .cta{ transition:none !important; }
+      .aurora::before, .aurora::after{ animation:none !important; }
     }
   </style>
 </head>
-
 <body>
-  <!-- LOGIN SCREEN -->
-  <div id="login-screen" class="fade visible">
-    <div id="login-box">
-      <h2>Login</h2>
+  <div class="aurora"></div>
+  <div class="grid"></div>
 
-      <div id="login-error">Invalid credentials</div>
+  <!-- ================= LOGIN ================= -->
+  <div id="login-screen" class="fade visible" aria-hidden="false">
+    <div class="login-shell">
+      <div id="login-box">
+        <div class="brandmark">Chase Dashboard</div>
+        <div class="tagline">A clean, modern view of everything in one place.</div>
 
-      <div class="input-group">
-        <!-- user icon -->
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/></svg>
-        <input type="text" id="username" placeholder="Username">
+        <div id="login-error">Invalid credentials</div>
+
+        <div class="input-group">
+          <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#22d3ee" d="M12 13.2a5.2 5.2 0 1 0 0-10.4 5.2 5.2 0 0 0 0 10.4Z"/>
+            <path fill="#8b5cf6" d="M4.2 20.6c0-3.4 3.9-6.2 7.8-6.2s7.8 2.8 7.8 6.2v.2c0 .7-.6 1.2-1.3 1.2H5.5c-.7 0-1.3-.5-1.3-1.2v-.2Z"/>
+          </svg>
+          <input id="username" class="input" type="text" placeholder="Username" autocomplete="username" />
+        </div>
+
+        <div class="input-group">
+          <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#22d3ee" d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2Zm-8-2a3 3 0 1 1 6 0v2H9V7Zm4 9.7V17a1 1 0 1 0-2 0v-.3a2 2 0 1 0 2 0Z"/>
+          </svg>
+          <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
+        </div>
+
+        <div class="login-actions">
+          <button id="login-btn" class="btn">Log In</button>
+          <button id="demo-btn" class="btn btn-alt">Demo</button>
+        </div>
       </div>
-
-      <div class="input-group">
-        <!-- lock icon -->
-        <svg viewBox="0 0 24 24"><path d="M17 8V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H5v14h14V8h-2zm-8 0V6c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9z"/></svg>
-        <input type="password" id="password" placeholder="Password">
-      </div>
-
-      <button id="login-btn">Log In</button>
     </div>
   </div>
 
-  <!-- DASHBOARD (hidden until login succeeds) -->
-  <div id="dashboard" class="fade">
-    <div class="your-account-header">
-      <h1>Your Account</h1>
-    </div>
+  <!-- ================= DASHBOARD ================= -->
+  <div id="dashboard" class="hidden fade" aria-hidden="true">
+    <div class="page">
+      <div class="topbar">
+        <div class="top-brand">Chase</div>
+        <div class="chip">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="#9bd7ff" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-3.31 0-10 1.66-10 5v3h20v-3c0-3.34-6.69-5-10-5Z"/></svg>
+          Welcome, <strong>&nbsp;Shloak</strong>
+        </div>
+      </div>
 
-    <div class="account-section">
-      <h2>Bank Accounts (2)</h2>
-      <ul class="account-list">
-        <li>
-          <a class="title" href="https://notshloakrblx.github.io/checking-dashboard/" target="_blank">
-            Chase Sapphire Checking ****2431
-          </a>
-          <a class="amount" href="https://notshloakrblx.github.io/checking-dashboard/" target="_blank">
-            $350.00
-          </a>
-        </li>
-        <li>
-          <a class="title" href="https://notshloakrblx.github.io/savings-dashboard/" target="_blank">
-            Chase Savings ****9124
-          </a>
-          <a class="amount" href="https://notshloakrblx.github.io/savings-dashboard/" target="_blank">
-            $741.36
-          </a>
-        </li>
-      </ul>
+      <div class="container">
+        <!-- Totals quick glance -->
+        <div class="totals">
+          <div class="total-card">
+            <div class="total-title">Total bank balance</div>
+            <div class="total-value">$1,091.36</div>
+          </div>
+          <div class="total-card">
+            <div class="total-title">Credit card balances</div>
+            <div class="total-value">$0.00</div>
+          </div>
+          <div class="total-card">
+            <div class="total-title">Lines of credit</div>
+            <div class="total-value"><span class="pos">$1,287.54</span></div>
+          </div>
+        </div>
 
-      <h2>Credit Cards (2)</h2>
-      <ul class="account-list">
-        <li>
-          <a class="title" href="https://notshloakrblx.github.io/sapphire-dashboard/" target="_blank">
-            Chase Sapphire Reserve ****7295
-          </a>
-          <a class="amount" href="https://notshloakrblx.github.io/sapphire-dashboard/" target="_blank">
-            $0.00
-          </a>
-        </li>
-        <li>
-          <a class="title" href="https://notshloakrblx.github.io/aadvantage-dashboard/" target="_blank">
-            American Airlines AAdvantage Platinum Select ****8126
-          </a>
-          <a class="amount" href="https://notshloakrblx.github.io/aadvantage-dashboard/" target="_blank">
-            $0.00
-          </a>
-        </li>
-      </ul>
+        <!-- Bank Accounts -->
+        <div class="section-title">Bank accounts (2)</div>
+        <div class="cards" role="list">
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#7dd3fc" d="M12 3 1 9l11 6 9-4.91V19h2V9L12 3z"/><path fill="#7dd3fc" d="M11 12H3v7h8v-7z"/></svg>
+                <span>Chase Sapphire Checking • ****2431</span>
+              </div>
+              <div class="amount">$350.00</div>
+            </div>
+            <a class="full" href="https://notshloakrblx.github.io/checking-dashboard/" target="_blank" rel="noopener">
+              Open account
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#a6c8ff" d="M12 4h8v8h-2V8.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V4z"/></svg>
+            </a>
+          </div>
 
-      <h2>Lines of Credit (2)</h2>
-      <ul class="account-list">
-        <li>
-          <span class="title">CREDIT CARDS</span>
-          <span class="amount">$637.54</span>
-        </li>
-        <li>
-          <span class="title">SS Credit Acceptance</span>
-          <span class="amount">$650.00</span>
-        </li>
-      </ul>
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#7dd3fc" d="M12 2a7 7 0 0 0-7 7v7h14V9a7 7 0 0 0-7-7Zm0 2a5 5 0 0 1 5 5v1H7V9a5 5 0 0 1 5-5Z"/><path fill="#7dd3fc" d="M6 18h12v2H6z"/></svg>
+                <span>Chase Savings • ****9124</span>
+              </div>
+              <div class="amount">$741.36</div>
+            </div>
+            <a class="full" href="https://notshloakrblx.github.io/savings-dashboard/" target="_blank" rel="noopener">
+              Open account
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#a6c8ff" d="M12 4h8v8h-2V8.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V4z"/></svg>
+            </a>
+          </div>
+        </div>
 
-      <div class="quick-links">
-        <a class="btn-ultimate" href="https://notshloakrblx.github.io/ultimate-rewards/" target="_blank">
-          Ultimate Rewards
-        </a>
-        <a class="btn-creditjourney" href="https://notshloakrblx.github.io/credit-journey/" target="_blank">
-          Credit Journey
-        </a>
-        <a class="btn-taxes" href="https://sites.google.com/view/chasetaxes" target="_blank">
-          Chase Taxes
-        </a>
+        <!-- Credit Cards -->
+        <div class="section-title">Credit cards (2)</div>
+        <div class="cards" role="list">
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#9ee5ff" d="M3 5h18a2 2 0 0 1 2 2v3H1V7a2 2 0 0 1 2-2Zm-2 7h22v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-5z"/></svg>
+                <span>Chase Sapphire Reserve • ****7295</span>
+                <span class="badge">Card</span>
+              </div>
+              <div class="amount">$0.00</div>
+            </div>
+            <a class="full" href="https://notshloakrblx.github.io/sapphire-dashboard/" target="_blank" rel="noopener">
+              Manage card
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#a6c8ff" d="M12 4h8v8h-2V8.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V4z"/></svg>
+            </a>
+          </div>
+
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#9ee5ff" d="M3 5h18a2 2 0 0 1 2 2v3H1V7a2 2 0 0 1 2-2Zm-2 7h22v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-5z"/></svg>
+                <span>AAAdvantage Platinum Select • ****8126</span>
+                <span class="badge">Card</span>
+              </div>
+              <div class="amount">$0.00</div>
+            </div>
+            <a class="full" href="https://notshloakrblx.github.io/aadvantage-dashboard/" target="_blank" rel="noopener">
+              Manage card
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#a6c8ff" d="M12 4h8v8h-2V8.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V4z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Lines of credit -->
+        <div class="section-title">Lines of credit (2)</div>
+        <div class="cards" role="list">
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#b7f7d0" d="M4 4h16v4H4zM4 10h16v10H4z"/></svg>
+                <span>CREDIT CARDS</span>
+                <span class="badge">LOC</span>
+              </div>
+              <div class="amount">$637.54</div>
+            </div>
+          </div>
+
+          <div class="card" role="listitem">
+            <div class="card-row">
+              <div class="name">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#b7f7d0" d="M7 6h10l4 6-4 6H7L3 12l4-6z"/></svg>
+                <span>SS Credit Acceptance</span>
+                <span class="badge">LOC</span>
+              </div>
+              <div class="amount">$650.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="section-title">Quick links</div>
+        <div class="cards">
+          <div class="card quick">
+            <a class="cta blue" href="https://notshloakrblx.github.io/ultimate-rewards/" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 9 8l-7 1 5 4-1 7 6-3 6 3-1-7 5-4-7-1-3-6z"/></svg>
+              Ultimate Rewards
+            </a>
+          </div>
+          <div class="card quick">
+            <a class="cta green" href="https://notshloakrblx.github.io/credit-journey/" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 1 9 9H3v-2h9a7 7 0 1 0-7-7H3Z"/></svg>
+              Credit Journey
+            </a>
+          </div>
+          <div class="card quick">
+            <a class="cta" href="https://sites.google.com/view/chasetaxes" target="_blank" rel="noopener">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v2H3zm0 4h18v12H3zM6 10h5v2H6z"/></svg>
+              Chase Taxes
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
+    // ===== Login handling =====
     const loginScreen = document.getElementById('login-screen');
-    const dashboard    = document.getElementById('dashboard');
-    const errMsg       = document.getElementById('login-error');
-    const btn          = document.getElementById('login-btn');
+    const dashboard   = document.getElementById('dashboard');
+    const errMsg      = document.getElementById('login-error');
+    const loginBtn    = document.getElementById('login-btn');
+    const demoBtn     = document.getElementById('demo-btn');
 
-    btn.addEventListener('click', () => {
+    function openApp(){
+      loginScreen.classList.remove('visible');
+      loginScreen.classList.add('hidden');
+      setTimeout(()=> {
+        dashboard.classList.remove('hidden');
+        dashboard.classList.add('visible');
+        dashboard.setAttribute('aria-hidden','false');
+        loginScreen.setAttribute('aria-hidden','true');
+        // focus first interactive element for a11y
+        const firstCta = dashboard.querySelector('.cta');
+        if(firstCta) firstCta.focus?.();
+      }, 260);
+    }
+
+    function tryLogin(){
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
-      if (u === 'shloak' && p === 'Sac') {
-        loginScreen.classList.remove('visible');
-        loginScreen.classList.add('hidden');
-        setTimeout(() => {
-          dashboard.classList.remove('hidden');
-          dashboard.classList.add('visible');
-        }, 400);
-      } else {
+      if (u === 'shloak' && p === 'Sac'){ openApp(); }
+      else {
         errMsg.style.opacity = '1';
-        setTimeout(() => errMsg.style.opacity = '0', 2000);
+        setTimeout(()=> errMsg.style.opacity = '0', 1800);
       }
-    });
+    }
 
-    document.querySelectorAll('#username, #password').forEach(el => {
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Enter') btn.click();
-      });
+    loginBtn.addEventListener('click', tryLogin);
+    demoBtn.addEventListener('click', openApp); // quick preview without creds
+    ['username','password'].forEach(id=>{
+      document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
     });
   </script>
 </body>
 </html>
-
